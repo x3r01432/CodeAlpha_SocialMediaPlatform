@@ -38,7 +38,7 @@ function wirePosts(root, reload) {
         box.innerHTML = cs.map((c) => `<div class="comment"><a href="#/u/${esc(c.username)}" class="av">${c.avatar}</a><div><b>${esc(c.display_name)}</b> <span class="muted">${ago(c.created_at)}</span><div>${esc(c.content)}</div></div></div>`).join('') + (session() ? '<div class="row"><input placeholder="Write a comment…" maxlength="300"><button class="btn">Reply</button></div>' : '');
         const inp = $('input', box); if (!inp) return;
         const send = async () => { if (!inp.value.trim()) return; await api(`/posts/${id}/comments`, { method: 'POST', body: { content: inp.value } }); $('[data-cm] span', el).textContent = cs.length + 1; draw(); };
-        $('button', box).onclick = send; inp.onkeydown = (e) => e.key === 'Enter' && send();
+        $('button', box).onclick = send; inp.onkeydown = (e) => { if (e.key === 'Enter') send(); };
       };
       draw();
     };
@@ -98,11 +98,11 @@ const views = {
     };
   },
   login() {
-    $('#view').innerHTML = `<div class="card auth"><div style="text-align:center;font-size:48px">🔵</div><h2 id="t" style="text-align:center">Welcome back to Circle</h2><label>Username</label><input id="u"><label>Password</label><input id="p" type="password"><p class="err" id="err"></p><button class="btn" id="go" style="width:100%">Log in</button><p class="muted" style="text-align:center">New here? <a href="#" id="sw">Create an account</a></p></div>`;
+    $('#view').innerHTML = `<div class="card auth"><div style="text-align:center;font-size:48px">🔵</div><h2 id="t" style="text-align:center">Welcome back to Circle</h2><label>Username</label><input id="u"><label>Password</label><input id="p" type="password"><p class="err" id="err"></p><button class="btn" id="go" style="width:100%">Log in</button><p class="muted" style="text-align:center"><span id="swl">New here?</span> <a href="#" id="sw">Create an account</a></p></div>`;
     let mode = 'login';
-    $('#sw').onclick = (e) => { e.preventDefault(); mode = mode === 'login' ? 'register' : 'login'; $('#t').textContent = mode === 'login' ? 'Welcome back to Circle' : 'Join Circle'; $('#go').textContent = mode === 'login' ? 'Log in' : 'Sign up'; $('#sw').textContent = mode === 'login' ? 'Create an account' : 'Log in'; };
+    $('#sw').onclick = (e) => { e.preventDefault(); mode = mode === 'login' ? 'register' : 'login'; $('#t').textContent = mode === 'login' ? 'Welcome back to Circle' : 'Join Circle'; $('#go').textContent = mode === 'login' ? 'Log in' : 'Sign up'; $('#sw').textContent = mode === 'login' ? 'Create an account' : 'Log in'; $('#swl').textContent = mode === 'login' ? 'New here?' : 'Already have an account?'; };
     const go = async () => { try { const s = await api('/' + mode, { method: 'POST', body: { username: $('#u').value, password: $('#p').value } }); localStorage.setItem('circle_session', JSON.stringify(s)); location.hash = '#/'; route(); } catch (e) { $('#err').textContent = e.message; } };
-    $('#go').onclick = go; $('#p').onkeydown = (e) => e.key === 'Enter' && go();
+    $('#go').onclick = go; $('#p').onkeydown = (e) => { if (e.key === 'Enter') go(); };
   },
 };
 function route() {
